@@ -1,0 +1,2343 @@
+{% extends "base.html" %}
+
+{% block title %}Planner | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+
+<div class="page-title">
+    <div>
+        <span class="eyebrow">FOCUS TIME</span>
+        <h1>Study Planner 📅</h1>
+        <p>
+            Plan your sessions, start when you're ready,
+            and stay focused until the timer ends.
+        </p>
+    </div>
+</div>
+
+
+<div class="notes-layout">
+
+    <!-- CREATE SESSION -->
+
+    <section class="form-card">
+
+        <h2>Schedule Session ✨</h2>
+
+        <form
+            method="POST"
+            action="{{ url_for('planner.study_planner') }}"
+        >
+
+            <label for="subject">Subject</label>
+
+            <input
+                id="subject"
+                type="text"
+                name="subject"
+                placeholder="e.g. Software Engineering"
+                maxlength="200"
+                required
+            >
+
+            <label for="study-date">Date</label>
+
+            <input
+                id="study-date"
+                type="date"
+                name="study_date"
+                required
+            >
+
+            <label for="start-time">Start Time</label>
+
+            <input
+                id="start-time"
+                type="time"
+                name="start_time"
+            >
+
+            <label for="duration">Duration</label>
+
+            <select
+                id="duration"
+                name="duration"
+                required
+            >
+                <option value="1">1 minute</option>
+                <option value="5">5 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60" selected>1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+                <option value="180">3 hours</option>
+            </select>
+
+            <label for="session-notes">
+                Session Notes
+            </label>
+
+            <textarea
+                id="session-notes"
+                name="notes"
+                rows="4"
+                maxlength="1000"
+                placeholder="What are you going to study?"
+            ></textarea>
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+                + Schedule Session
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- SESSION LIST -->
+
+    <section>
+
+        <div class="notes-header">
+
+            <h2>Study Sessions 📚</h2>
+
+            <span>
+                {{ sessions|length }} sessions
+            </span>
+
+        </div>
+
+
+        <div class="session-list">
+
+            {% for session in sessions %}
+
+                <article
+                    class="planner-item"
+                    id="session-{{ session.id }}"
+                    data-session-id="{{ session.id }}"
+                    data-duration="{{ session.duration }}"
+                    data-study-date="{{ session.study_date.strftime('%Y-%m-%d') }}"
+                    data-start-time="{{ session.start_time or '' }}"
+                    data-status="{{ session.status }}"
+                >
+
+                    <div class="calendar-date">
+
+                        <strong>
+                            {{ session.study_date.strftime('%d') }}
+                        </strong>
+
+                        <span>
+                            {{ session.study_date.strftime('%b') }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="planner-info">
+
+                        <h3>
+                            {{ session.subject }}
+                        </h3>
+
+                        <p>
+                            ⏱
+                            <span class="session-duration">
+                                {{ session.duration }}
+                            </span>
+                            minutes
+
+                            {% if session.start_time %}
+                                · 🕐 {{ session.start_time }}
+                            {% endif %}
+                        </p>
+
+
+                        {% if session.notes %}
+
+                            <small>
+                                {{ session.notes }}
+                            </small>
+
+                        {% endif %}
+
+
+                        <!-- COUNTDOWN -->
+
+                        <div
+                            class="session-countdown"
+                            id="countdown-{{ session.id }}"
+                            style="display:none;"
+                        >
+
+                            <span class="countdown-label">
+                                FOCUS TIME
+                            </span>
+
+                            <strong class="countdown-time">
+                                00:00
+                            </strong>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div
+                            class="session-status"
+                            id="status-{{ session.id }}"
+                        >
+
+                            {% if session.status == 'completed' %}
+
+                                <span class="badge badge-green">
+                                    ✓ Completed
+                                </span>
+
+                            {% elif session.status == 'active' %}
+
+                                <span class="badge badge-purple">
+                                    🔥 Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-blue">
+                                    🗓 Planned
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="planner-actions">
+
+                        {% if session.status != 'completed' %}
+
+                            <button
+                                type="button"
+                                class="primary-btn start-session-btn"
+                                data-session-id="{{ session.id }}"
+                                data-duration="{{ session.duration }}"
+                            >
+                                ▶ Start
+                            </button>
+
+                        {% endif %}
+
+
+                        <button
+                            type="button"
+                            class="delete-btn delete-session-btn"
+                            data-session-id="{{ session.id }}"
+                        >
+                            🗑️ Delete
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div>📚</div>
+
+                    <h3>
+                        No study sessions yet
+                    </h3>
+
+                    <p>
+                        Schedule your first focused session
+                        and let's get studying.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+```
+
+</div>
+
+<!-- =====================================================
+     MISSED SESSION NOTIFICATION
+====================================================== -->
+
+<div
+    id="plannerNotification"
+    class="planner-notification"
+>
+
+
+<div class="planner-notification-icon">
+    ⏰
+</div>
+
+<div class="planner-notification-content">
+
+    <strong id="plannerNotificationTitle">
+        Study session reminder
+    </strong>
+
+    <p id="plannerNotificationMessage">
+        Your planned study time has passed.
+    </p>
+
+</div>
+
+<button
+    type="button"
+    id="plannerNotificationClose"
+    class="planner-notification-close"
+    aria-label="Close notification"
+>
+    ×
+</button>
+```
+
+</div>
+
+<!-- =====================================================
+     COMPLETION MODAL
+
+     IMPORTANT:
+     It is HARD HIDDEN when the page loads.
+====================================================== -->
+
+<div
+    id="sessionCompleteModal"
+    class="study-complete-overlay"
+    style="display: none !important; opacity: 0; visibility: hidden; pointer-events: none;"
+>
+
+```
+<div
+    class="study-complete-box"
+    onclick="event.stopPropagation()"
+>
+
+    <button
+        type="button"
+        class="study-complete-close"
+        id="sessionCompleteClose"
+        aria-label="Close"
+    >
+        ×
+    </button>
+
+    <div class="study-complete-icon">
+        🎉
+    </div>
+
+    <h2>
+        Session Completed!
+    </h2>
+
+    <p id="completionMessage">
+        You did it! Another focused session in the bag. 💜
+    </p>
+
+    <button
+        type="button"
+        class="primary-btn"
+        id="completionDone"
+    >
+        Awesome! ✨
+    </button>
+
+</div>
+```
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* =====================================================
+       STORAGE
+    ===================================================== */
+
+    const TIMER_STORAGE_KEY =
+        "studyflow_active_timers";
+
+    const MISSED_STORAGE_KEY =
+        "studyflow_missed_sessions";
+
+
+    let storedTimers = {};
+
+    let notifiedMissedSessions = {};
+
+
+    try {
+
+        storedTimers =
+            JSON.parse(
+                localStorage.getItem(
+                    TIMER_STORAGE_KEY
+                )
+            ) || {};
+
+    } catch (error) {
+
+        storedTimers = {};
+
+    }
+
+
+    try {
+
+        notifiedMissedSessions =
+            JSON.parse(
+                localStorage.getItem(
+                    MISSED_STORAGE_KEY
+                )
+            ) || {};
+
+    } catch (error) {
+
+        notifiedMissedSessions = {};
+
+    }
+
+
+    const activeTimers = {};
+
+
+    function saveTimers() {
+
+        localStorage.setItem(
+            TIMER_STORAGE_KEY,
+            JSON.stringify(storedTimers)
+        );
+
+    }
+
+
+    function saveMissedNotifications() {
+
+        localStorage.setItem(
+            MISSED_STORAGE_KEY,
+            JSON.stringify(
+                notifiedMissedSessions
+            )
+        );
+
+    }
+
+
+
+    /* =====================================================
+       MISSED SESSION NOTIFICATION
+    ===================================================== */
+
+    const plannerNotification =
+        document.getElementById(
+            "plannerNotification"
+        );
+
+
+    const plannerNotificationTitle =
+        document.getElementById(
+            "plannerNotificationTitle"
+        );
+
+
+    const plannerNotificationMessage =
+        document.getElementById(
+            "plannerNotificationMessage"
+        );
+
+
+    const plannerNotificationClose =
+        document.getElementById(
+            "plannerNotificationClose"
+        );
+
+
+    let notificationTimeout = null;
+
+
+    function showPlannerNotification(
+        subject,
+        startTime
+    ) {
+
+        if (!plannerNotification) {
+            return;
+        }
+
+
+        if (plannerNotificationTitle) {
+
+            plannerNotificationTitle.textContent =
+                "You haven't started your session yet ⏰";
+
+        }
+
+
+        if (plannerNotificationMessage) {
+
+            plannerNotificationMessage.textContent =
+                subject +
+                " was planned for " +
+                startTime +
+                ". The planned start time has passed.";
+
+        }
+
+
+        plannerNotification.classList.add("show");
+
+
+        if (notificationTimeout) {
+
+            clearTimeout(
+                notificationTimeout
+            );
+
+        }
+
+
+        notificationTimeout =
+            setTimeout(
+                function () {
+
+                    plannerNotification.classList.remove(
+                        "show"
+                    );
+
+                },
+                8000
+            );
+
+    }
+
+
+    if (plannerNotificationClose) {
+
+        plannerNotificationClose.addEventListener(
+            "click",
+            function () {
+
+                plannerNotification.classList.remove(
+                    "show"
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       CHECK MISSED SESSIONS
+    ===================================================== */
+
+    function checkMissedSessions() {
+
+        const now = new Date();
+
+
+        document.querySelectorAll(
+            ".planner-item"
+        ).forEach(function (card) {
+
+            const sessionId =
+                card.dataset.sessionId;
+
+
+            const studyDate =
+                card.dataset.studyDate;
+
+
+            const startTime =
+                card.dataset.startTime;
+
+
+            const status =
+                card.dataset.status;
+
+
+            if (
+                !studyDate ||
+                !startTime
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                status === "completed" ||
+                status === "active"
+            ) {
+
+                return;
+
+            }
+
+
+            const plannedDate =
+                new Date(
+                    studyDate +
+                    "T" +
+                    startTime
+                );
+
+
+            if (
+                Number.isNaN(
+                    plannedDate.getTime()
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                now.getTime() >
+                plannedDate.getTime()
+            ) {
+
+                markSessionMissed(
+                    sessionId,
+                    card
+                );
+
+            }
+
+        });
+
+    }
+
+
+
+    /* =====================================================
+       MARK MISSED
+    ===================================================== */
+
+    function markSessionMissed(
+        sessionId,
+        card
+    ) {
+
+        if (!card) {
+            return;
+        }
+
+
+        if (
+            card.dataset.status === "active" ||
+            card.dataset.status === "completed"
+        ) {
+
+            return;
+
+        }
+
+
+        card.classList.add(
+            "session-missed"
+        );
+
+
+        const statusElement =
+            document.getElementById(
+                "status-" +
+                sessionId
+            );
+
+
+        if (statusElement) {
+
+            statusElement.innerHTML =
+                '<span class="badge badge-missed">' +
+                '⚠️ Start time passed' +
+                '</span>';
+
+        }
+
+
+        if (
+            !notifiedMissedSessions[
+                sessionId
+            ]
+        ) {
+
+            const subjectElement =
+                card.querySelector(
+                    ".planner-info h3"
+                );
+
+
+            const subject =
+                subjectElement
+                    ? subjectElement.textContent.trim()
+                    : "Your study session";
+
+
+            const startTime =
+                card.dataset.startTime;
+
+
+            showPlannerNotification(
+                subject,
+                startTime
+            );
+
+
+            notifiedMissedSessions[
+                sessionId
+            ] = true;
+
+
+            saveMissedNotifications();
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       FORMAT TIMER
+    ===================================================== */
+
+    function formatTime(totalSeconds) {
+
+        totalSeconds =
+            Math.max(
+                0,
+                Math.floor(totalSeconds)
+            );
+
+
+        const hours =
+            Math.floor(
+                totalSeconds / 3600
+            );
+
+
+        const minutes =
+            Math.floor(
+                (totalSeconds % 3600) / 60
+            );
+
+
+        const seconds =
+            totalSeconds % 60;
+
+
+        if (hours > 0) {
+
+            return (
+                String(hours).padStart(2, "0") +
+                ":" +
+                String(minutes).padStart(2, "0") +
+                ":" +
+                String(seconds).padStart(2, "0")
+            );
+
+        }
+
+
+        return (
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(seconds).padStart(2, "0")
+        );
+
+    }
+
+
+
+    /* =====================================================
+       SET ACTIVE
+    ===================================================== */
+
+    function setSessionActive(
+        sessionId
+    ) {
+
+        const status =
+            document.getElementById(
+                "status-" +
+                sessionId
+            );
+
+
+        if (status) {
+
+            status.innerHTML =
+                '<span class="badge badge-purple">' +
+                '🔥 Active' +
+                '</span>';
+
+        }
+
+
+        const button =
+            document.querySelector(
+                '.start-session-btn[data-session-id="' +
+                sessionId +
+                '"]'
+            );
+
+
+        if (button) {
+
+            button.disabled = true;
+
+            button.textContent =
+                "🔥 Working...";
+
+        }
+
+
+        const card =
+            document.getElementById(
+                "session-" +
+                sessionId
+            );
+
+
+        if (card) {
+
+            card.classList.remove(
+                "session-missed"
+            );
+
+
+            card.dataset.status =
+                "active";
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       COMPLETE SESSION
+    ===================================================== */
+
+    function completeSession(
+        sessionId,
+        subject
+    ) {
+
+        delete storedTimers[
+            sessionId
+        ];
+
+        saveTimers();
+
+
+        if (
+            activeTimers[
+                sessionId
+            ]
+        ) {
+
+            clearInterval(
+                activeTimers[
+                    sessionId
+                ]
+            );
+
+
+            delete activeTimers[
+                sessionId
+            ];
+
+        }
+
+
+        fetch(
+            "/planner/complete/" +
+            sessionId,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                }
+            }
+        )
+        .then(function (response) {
+
+            return response.json();
+
+        })
+        .then(function (data) {
+
+            if (!data.success) {
+
+                console.error(
+                    "Could not complete session."
+                );
+
+                return;
+
+            }
+
+
+            const status =
+                document.getElementById(
+                    "status-" +
+                    sessionId
+                );
+
+
+            if (status) {
+
+                status.innerHTML =
+                    '<span class="badge badge-green">' +
+                    '✓ Completed' +
+                    '</span>';
+
+            }
+
+
+            const card =
+                document.getElementById(
+                    "session-" +
+                    sessionId
+                );
+
+
+            if (card) {
+
+                card.classList.remove(
+                    "session-missed"
+                );
+
+
+                card.dataset.status =
+                    "completed";
+
+
+                card.classList.add(
+                    "session-finished"
+                );
+
+            }
+
+
+            const countdown =
+                document.getElementById(
+                    "countdown-" +
+                    sessionId
+                );
+
+
+            if (countdown) {
+
+                countdown.style.display =
+                    "none";
+
+            }
+
+
+            const startButton =
+                document.querySelector(
+                    '.start-session-btn[data-session-id="' +
+                    sessionId +
+                    '"]'
+                );
+
+
+            if (startButton) {
+
+                startButton.remove();
+
+            }
+
+
+            showCompletionMessage(
+                subject
+            );
+
+        })
+        .catch(function (error) {
+
+            console.error(
+                "Completion error:",
+                error
+            );
+
+        });
+
+    }
+
+
+
+    /* =====================================================
+       START COUNTDOWN
+    ===================================================== */
+
+    function startCountdown(
+        sessionId,
+        endTime,
+        subject
+    ) {
+
+        const countdown =
+            document.getElementById(
+                "countdown-" +
+                sessionId
+            );
+
+
+        const timeDisplay =
+            countdown
+                ? countdown.querySelector(
+                    ".countdown-time"
+                )
+                : null;
+
+
+        if (
+            !countdown ||
+            !timeDisplay
+        ) {
+
+            return;
+
+        }
+
+
+        countdown.style.display =
+            "block";
+
+
+        setSessionActive(
+            sessionId
+        );
+
+
+        if (
+            activeTimers[
+                sessionId
+            ]
+        ) {
+
+            clearInterval(
+                activeTimers[
+                    sessionId
+                ]
+            );
+
+        }
+
+
+        let completed = false;
+
+
+        function updateTimer() {
+
+            const remaining =
+                Math.ceil(
+                    (
+                        endTime -
+                        Date.now()
+                    ) / 1000
+                );
+
+
+            if (remaining <= 0) {
+
+                timeDisplay.textContent =
+                    "00:00";
+
+
+                if (!completed) {
+
+                    completed = true;
+
+
+                    /*
+                     * ONLY a timer that was
+                     * actively running on this
+                     * page can show completion.
+                     */
+
+                    sessionStorage.setItem(
+                        "studyflow_show_completion_popup",
+                        "yes"
+                    );
+
+
+                    completeSession(
+                        sessionId,
+                        subject
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            timeDisplay.textContent =
+                formatTime(
+                    remaining
+                );
+
+        }
+
+
+        updateTimer();
+
+
+        activeTimers[
+            sessionId
+        ] =
+            setInterval(
+                updateTimer,
+                1000
+            );
+
+    }
+
+
+
+    /* =====================================================
+       START SESSION BUTTON
+    ===================================================== */
+
+    document.querySelectorAll(
+        ".start-session-btn"
+    ).forEach(function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                const sessionId =
+                    this.dataset.sessionId;
+
+
+                const duration =
+                    Number(
+                        this.dataset.duration
+                    );
+
+
+                const card =
+                    document.getElementById(
+                        "session-" +
+                        sessionId
+                    );
+
+
+                const subjectElement =
+                    card
+                        ? card.querySelector(
+                            ".planner-info h3"
+                        )
+                        : null;
+
+
+                const subject =
+                    subjectElement
+                        ? subjectElement.textContent.trim()
+                        : "study";
+
+
+                if (
+                    !Number.isFinite(
+                        duration
+                    ) ||
+                    duration <= 0
+                ) {
+
+                    showMessage(
+                        "Invalid session duration."
+                    );
+
+                    return;
+
+                }
+
+
+                this.disabled = true;
+
+
+                fetch(
+                    "/planner/start/" +
+                    sessionId,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                )
+                .then(function (response) {
+
+                    return response.json();
+
+                })
+                .then(function (data) {
+
+                    if (!data.success) {
+
+                        showMessage(
+                            data.message ||
+                            "Could not start session."
+                        );
+
+
+                        button.disabled =
+                            false;
+
+
+                        return;
+
+                    }
+
+
+                    const actualDuration =
+                        Number(
+                            data.duration
+                        );
+
+
+                    const endTime =
+                        Date.now() +
+                        (
+                            actualDuration *
+                            60 *
+                            1000
+                        );
+
+
+                    storedTimers[
+                        sessionId
+                    ] = {
+
+                        endTime:
+                            endTime,
+
+                        subject:
+                            subject
+
+                    };
+
+
+                    saveTimers();
+
+
+                    startCountdown(
+                        sessionId,
+                        endTime,
+                        subject
+                    );
+
+                })
+                .catch(function (error) {
+
+                    console.error(
+                        "Start error:",
+                        error
+                    );
+
+
+                    button.disabled =
+                        false;
+
+
+                    showMessage(
+                        "Something went wrong while starting the session."
+                    );
+
+                });
+
+            }
+        );
+
+    });
+
+
+
+    /* =====================================================
+       DELETE SESSION
+    ===================================================== */
+
+    document.querySelectorAll(
+        ".delete-session-btn"
+    ).forEach(function (button) {
+
+        button.addEventListener(
+            "click",
+            async function () {
+
+                const sessionId =
+                    this.dataset.sessionId;
+
+
+                const card =
+                    document.getElementById(
+                        "session-" +
+                        sessionId
+                    );
+
+
+                if (!sessionId) {
+                    return;
+                }
+
+
+                const confirmed =
+                    await showConfirm(
+                        "Delete Study Session?",
+                        "Are you sure you want to permanently delete this study session?"
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/planner/delete/" +
+                            sessionId,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        throw new Error(
+                            data.message ||
+                            "Could not delete session."
+                        );
+
+                    }
+
+
+                    delete storedTimers[
+                        sessionId
+                    ];
+
+
+                    delete notifiedMissedSessions[
+                        sessionId
+                    ];
+
+
+                    saveTimers();
+
+                    saveMissedNotifications();
+
+
+                    if (
+                        activeTimers[
+                            sessionId
+                        ]
+                    ) {
+
+                        clearInterval(
+                            activeTimers[
+                                sessionId
+                            ]
+                        );
+
+
+                        delete activeTimers[
+                            sessionId
+                        ];
+
+                    }
+
+
+                    if (card) {
+
+                        card.style.opacity =
+                            "0";
+
+
+                        card.style.transform =
+                            "translateX(20px)";
+
+
+                        card.style.transition =
+                            "all 0.25s ease";
+
+
+                        setTimeout(
+                            function () {
+
+                                card.remove();
+
+                            },
+                            250
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Delete error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        error.message ||
+                        "Something went wrong while deleting the session."
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+
+    /* =====================================================
+       RESTORE ACTIVE TIMERS
+    ===================================================== */
+
+    Object.keys(
+        storedTimers
+    ).forEach(function (sessionId) {
+
+        const timer =
+            storedTimers[
+                sessionId
+            ];
+
+
+        const card =
+            document.getElementById(
+                "session-" +
+                sessionId
+            );
+
+
+        if (!card) {
+
+            delete storedTimers[
+                sessionId
+            ];
+
+            return;
+
+        }
+
+
+        if (
+            timer.endTime <=
+            Date.now()
+        ) {
+
+            /*
+             * Timer expired while the user
+             * was away.
+             *
+             * Complete silently.
+             *
+             * NO POPUP.
+             */
+
+            delete storedTimers[
+                sessionId
+            ];
+
+
+            const status =
+                document.getElementById(
+                    "status-" +
+                    sessionId
+                );
+
+
+            if (status) {
+
+                status.innerHTML =
+                    '<span class="badge badge-green">' +
+                    '✓ Completed' +
+                    '</span>';
+
+            }
+
+
+            card.dataset.status =
+                "completed";
+
+
+            const startButton =
+                document.querySelector(
+                    '.start-session-btn[data-session-id="' +
+                    sessionId +
+                    '"]'
+                );
+
+
+            if (startButton) {
+
+                startButton.remove();
+
+            }
+
+
+            fetch(
+                "/planner/complete/" +
+                sessionId,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+            )
+            .catch(function (error) {
+
+                console.error(
+                    "Silent completion error:",
+                    error
+                );
+
+            });
+
+
+            return;
+
+        }
+
+
+        /*
+         * Still running.
+         * Restore timer silently.
+         */
+
+        startCountdown(
+            sessionId,
+            timer.endTime,
+            timer.subject ||
+            "study"
+        );
+
+    });
+
+
+    saveTimers();
+
+
+    /*
+     * Check missed sessions.
+     *
+     * This only handles the
+     * "Start time passed" notification.
+     */
+
+    checkMissedSessions();
+
+
+    setInterval(
+        checkMissedSessions,
+        10000
+    );
+
+});
+
+
+
+/* =========================================================
+   COMPLETION MODAL
+========================================================= */
+
+
+/*
+ * ALWAYS remove stale permission when
+ * Planner loads.
+ *
+ * Therefore refreshing Planner can NEVER
+ * reopen an old completion popup.
+ */
+
+sessionStorage.removeItem(
+    "studyflow_show_completion_popup"
+);
+
+
+
+function showCompletionMessage(
+    subject
+) {
+
+    /*
+     * Only an actual timer completion
+     * can authorize this popup.
+     */
+
+    const permission =
+        sessionStorage.getItem(
+            "studyflow_show_completion_popup"
+        );
+
+
+    if (permission !== "yes") {
+
+        return;
+
+    }
+
+
+    /*
+     * Consume permission immediately.
+     */
+
+    sessionStorage.removeItem(
+        "studyflow_show_completion_popup"
+    );
+
+
+    const modal =
+        document.getElementById(
+            "sessionCompleteModal"
+        );
+
+
+    const message =
+        document.getElementById(
+            "completionMessage"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "Amazing! You completed your " +
+            subject +
+            " session. Keep going! 💪✨";
+
+    }
+
+
+    if (modal) {
+
+        /*
+         * IMPORTANT:
+         *
+         * The HTML uses
+         * display:none !important.
+         *
+         * Therefore normal modal.style.display
+         * does NOT work.
+         *
+         * setProperty(..., "important")
+         * correctly overrides it ONLY here.
+         */
+
+        modal.style.setProperty(
+            "display",
+            "flex",
+            "important"
+        );
+
+
+        modal.classList.add(
+            "show"
+        );
+
+
+        document.body.style.overflow =
+            "hidden";
+
+    }
+
+}
+
+
+
+function closeCompleteModal() {
+
+    const modal =
+        document.getElementById(
+            "sessionCompleteModal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
+            "show"
+        );
+
+
+        /*
+         * Permanently hide again after closing.
+         */
+
+        modal.style.setProperty(
+            "display",
+            "none",
+            "important"
+        );
+
+    }
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+
+const completeClose =
+    document.getElementById(
+        "sessionCompleteClose"
+    );
+
+
+const completeDone =
+    document.getElementById(
+        "completionDone"
+    );
+
+
+if (completeClose) {
+
+    completeClose.addEventListener(
+        "click",
+        closeCompleteModal
+    );
+
+}
+
+
+if (completeDone) {
+
+    completeDone.addEventListener(
+        "click",
+        closeCompleteModal
+    );
+
+}
+
+
+const completeModal =
+    document.getElementById(
+        "sessionCompleteModal"
+    );
+
+
+if (completeModal) {
+
+    completeModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                completeModal
+            ) {
+
+                closeCompleteModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            const modal =
+                document.getElementById(
+                    "sessionCompleteModal"
+                );
+
+
+            if (
+                modal &&
+                modal.classList.contains(
+                    "show"
+                )
+            ) {
+
+                closeCompleteModal();
+
+            }
+
+        }
+
+    }
+);
+
+</script>
+
+<style>
+
+/* =========================================================
+   MISSED SESSION
+========================================================= */
+
+.planner-item.session-missed {
+
+    border-color: #f2b7cb !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fffafd,
+            #fff1f6
+        ) !important;
+
+    box-shadow:
+        0 8px 28px rgba(
+            190,
+            76,
+            120,
+            0.10
+        );
+
+}
+
+
+.badge-missed {
+
+    background: #fff0f4 !important;
+
+    border: 1px solid #f4c5d5;
+
+    color: #b13f6c !important;
+
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+.planner-notification {
+
+    position: fixed;
+
+    right: 24px;
+
+    bottom: 24px;
+
+    z-index: 99999;
+
+    width:
+        min(
+            390px,
+            calc(100vw - 32px)
+        );
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 13px;
+
+    padding: 17px 18px;
+
+    border-radius: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #f1ccda;
+
+    box-shadow:
+        0 20px 50px rgba(
+            157,
+            70,
+            108,
+            0.18
+        ),
+        0 5px 18px rgba(
+            157,
+            70,
+            108,
+            0.08
+        );
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform:
+        translateY(25px)
+        scale(.96);
+
+    pointer-events: none;
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease,
+        visibility .25s ease;
+
+}
+
+
+.planner-notification.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateY(0)
+        scale(1);
+
+    pointer-events: auto;
+
+}
+
+
+.planner-notification-icon {
+
+    flex: 0 0 40px;
+
+    width: 40px;
+
+    height: 40px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    background: #fde8f0;
+
+    font-size: 20px;
+
+}
+
+
+.planner-notification-content {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.planner-notification-content strong {
+
+    display: block;
+
+    color: #382831;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    line-height: 1.35;
+
+}
+
+
+.planner-notification-content p {
+
+    margin: 5px 0 0;
+
+    color: #725c68;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+}
+
+
+.planner-notification-close {
+
+    flex: 0 0 auto;
+
+    width: 28px;
+
+    height: 28px;
+
+    display: grid;
+
+    place-items: center;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: #fff2f6;
+
+    color: #a74a72;
+
+    font-size: 19px;
+
+    cursor: pointer;
+
+}
+
+
+.planner-notification-close:hover {
+
+    background: #f9d9e6;
+
+    transform: rotate(90deg);
+
+}
+
+
+/* =========================================================
+   COMPLETION OVERLAY
+========================================================= */
+
+.study-complete-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 999999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(
+            35,
+            24,
+            31,
+            0.38
+        );
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity .25s ease,
+        visibility .25s ease;
+
+}
+
+
+.study-complete-overlay.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+
+}
+
+
+.study-complete-box {
+
+    position: relative;
+
+    width:
+        min(
+            430px,
+            calc(100vw - 32px)
+        );
+
+    padding:
+        38px
+        30px
+        30px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px solid #f1d5e1;
+
+    border-radius: 28px;
+
+    box-shadow:
+        0 30px 80px rgba(
+            120,
+            55,
+            90,
+            0.22
+        ),
+        0 10px 30px rgba(
+            120,
+            55,
+            90,
+            0.10
+        );
+
+    transform:
+        translateY(25px)
+        scale(.94);
+
+    transition:
+        transform .3s
+        cubic-bezier(
+            .2,
+            .8,
+            .2,
+            1
+        );
+
+}
+
+
+.study-complete-overlay.show
+.study-complete-box {
+
+    transform:
+        translateY(0)
+        scale(1);
+
+}
+
+
+.study-complete-icon {
+
+    width: 76px;
+
+    height: 76px;
+
+    margin:
+        0
+        auto
+        18px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fde8f1,
+            #f8dff0
+        );
+
+    font-size: 38px;
+
+}
+
+
+.study-complete-box h2 {
+
+    margin: 0;
+
+    color: #30262d;
+
+    font-family:
+        "Plus Jakarta Sans",
+        sans-serif;
+
+    font-size: 25px;
+
+    font-weight: 800;
+
+    line-height: 1.25;
+
+}
+
+
+.study-complete-box p {
+
+    margin:
+        12px
+        auto
+        24px;
+
+    max-width: 330px;
+
+    color: #735f6b;
+
+    font-family:
+        "DM Sans",
+        sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    line-height: 1.6;
+
+}
+
+
+.study-complete-close {
+
+    position: absolute;
+
+    top: 14px;
+
+    right: 14px;
+
+    width: 34px;
+
+    height: 34px;
+
+    display: grid;
+
+    place-items: center;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: #fff1f6;
+
+    color: #a64c75;
+
+    font-size: 22px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+}
+
+
+.study-complete-close:hover {
+
+    background: #f8d9e6;
+
+    transform: rotate(90deg);
+
+}
+
+
+@media (max-width: 600px) {
+
+    .planner-notification {
+
+        right: 16px;
+
+        bottom: 16px;
+
+        width:
+            calc(100vw - 32px);
+
+    }
+
+
+    .study-complete-overlay {
+
+        padding: 16px;
+
+    }
+
+
+    .study-complete-box {
+
+        width: 100%;
+
+        padding:
+            34px
+            22px
+            24px;
+
+        border-radius: 24px;
+
+    }
+
+
+    .study-complete-icon {
+
+        width: 68px;
+
+        height: 68px;
+
+        font-size: 34px;
+
+    }
+
+
+    .study-complete-box h2 {
+
+        font-size: 22px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- =====================================================
+         WELCOME
+    ====================================================== -->
+
+    <section class="dashboard-welcome">
+
+        <span class="dashboard-eyebrow">
+            STUDYFLOW
+        </span>
+
+        <h1>
+            Welcome back, {{ current_user.first_name }} 👋
+        </h1>
+
+        <p>
+            Your little space to organize, focus, and get things done.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <section class="dashboard-summary">
+
+        <!-- NOTES -->
+
+        <a href="{{ url_for('views.notes') }}"
+           class="summary-card notes-summary">
+
+            <div class="summary-icon">
+                📝
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    NOTES
+                </span>
+
+                <strong>
+                    {{ notes_count }}
+                </strong>
+
+                <p>
+                    {{ 'note' if notes_count == 1 else 'notes' }} saved
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- TASKS -->
+
+        <a href="{{ url_for('views.tasks') }}"
+           class="summary-card tasks-summary">
+
+            <div class="summary-icon">
+                ✓
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    TASKS
+                </span>
+
+                <strong>
+                    {{ tasks_count }}
+                </strong>
+
+                <p>
+                    {{ 'task' if tasks_count == 1 else 'tasks' }} to manage
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- PLANNER -->
+
+        <a href="{{ url_for('views.planner') }}"
+           class="summary-card planner-summary">
+
+            <div class="summary-icon">
+                📅
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    PLANNER
+                </span>
+
+                <strong>
+                    {{ sessions_count }}
+                </strong>
+
+                <p>
+                    {{ 'session' if sessions_count == 1 else 'sessions' }} planned
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+    </section>
+
+
+    <!-- =====================================================
+         MOTIVATION
+    ====================================================== -->
+
+    <section class="dashboard-motivation">
+
+        <span class="motivation-line"></span>
+
+        <p>
+            Small steps. Consistent progress. You’ve got this. ✨
+        </p>
+
+        <span class="motivation-line"></span>
+
+    </section>
+
+</div>
+
+{% endblock %}

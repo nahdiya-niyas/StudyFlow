@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+
+<!-- PAGE HEADER -->
+
+<div class="page-title">
+
+    <div>
+
+        <span class="eyebrow">
+            GET THINGS DONE
+        </span>
+
+        <h1>
+            My Tasks ✅
+        </h1>
+
+        <p>
+            Manage assignments, deadlines and priorities.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="notes-layout">
+
+
+    <!-- =====================================================
+         CREATE TASK
+         ===================================================== -->
+
+    <section class="form-card">
+
+        <h2>
+            Add a task
+        </h2>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('tasks.task_page') }}"
+        >
+
+            <label for="task-title">
+                Task
+            </label>
+
+            <input
+                id="task-title"
+                type="text"
+                name="title"
+                placeholder="Finish database assignment"
+                maxlength="150"
+                required
+            >
+
+
+            <label for="task-description">
+                Description
+            </label>
+
+            <textarea
+                id="task-description"
+                name="description"
+                rows="5"
+                placeholder="Optional details..."
+                maxlength="1000"
+            ></textarea>
+
+
+            <label for="due-date">
+                Due Date
+            </label>
+
+            <input
+                id="due-date"
+                type="date"
+                name="due_date"
+            >
+
+
+            <label for="priority">
+                Priority
+            </label>
+
+            <select
+                id="priority"
+                name="priority"
+            >
+
+                <option value="Low">
+                    Low
+                </option>
+
+                <option value="Medium" selected>
+                    Medium
+                </option>
+
+                <option value="High">
+                    High
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+                + Add Task
+            </button>
+
+        </form>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TASK LIST
+         ===================================================== -->
+
+    <section>
+
+        <div class="notes-header">
+
+            <h2>
+                My Tasks
+            </h2>
+
+            <span>
+                {{ tasks|length }} tasks
+            </span>
+
+        </div>
+
+
+        <div class="full-task-list">
+
+            {% for task in tasks %}
+
+            <article
+                class="task-item {% if task.completed %}completed{% endif %}"
+                data-task-id="{{ task.id }}"
+            >
+
+
+                <!-- COMPLETE -->
+
+                <button
+                    type="button"
+                    class="task-check"
+                    onclick="completeTask({{ task.id }})"
+                    aria-label="{% if task.completed %}Mark {{ task.title }} as incomplete{% else %}Complete {{ task.title }}{% endif %}"
+                >
+
+                    {% if task.completed %}
+                        ✓
+                    {% else %}
+                        ○
+                    {% endif %}
+
+                </button>
+
+
+
+                <!-- TASK INFO -->
+
+                <div class="task-info">
+
+                    <h3>
+                        {{ task.title }}
+                    </h3>
+
+
+                    {% if task.description %}
+
+                    <p>
+                        {{ task.description }}
+                    </p>
+
+                    {% endif %}
+
+
+                    {% if task.due_date %}
+
+                    <small>
+                        📅 Due
+                        {{ task.due_date.strftime('%d %b %Y') }}
+                    </small>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- PRIORITY -->
+
+                <span
+                    class="priority {{ task.priority|lower }}"
+                >
+                    {{ task.priority }}
+                </span>
+
+
+
+                <!-- DELETE -->
+
+                <button
+                    type="button"
+                    class="delete-btn"
+                    onclick="deleteTask({{ task.id }}); return false;"
+                >
+                    🗑️ Delete
+                </button>
+
+
+            </article>
+
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <div>
+                    🎉
+                </div>
+
+                <h3>
+                    No tasks yet
+                </h3>
+
+                <p>
+                    Add your first task.
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+```
+
+</div>
+
+<script>
+
+/*
+ * =========================================================
+ * COMPLETE TASK
+ * =========================================================
+ */
+
+async function completeTask(taskId) {
+
+    if (!taskId) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `/tasks/complete/${taskId}`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Could not update task."
+            );
+
+        }
+
+
+        window.location.reload();
+
+
+    } catch (error) {
+
+        console.error(
+            "Complete task error:",
+            error
+        );
+
+
+        if (typeof showMessage === "function") {
+
+            showMessage(
+                error.message ||
+                "Something went wrong while updating the task."
+            );
+
+        } else {
+
+            alert(
+                error.message ||
+                "Something went wrong while updating the task."
+            );
+
+        }
+
+    }
+
+}
+
+
+window.completeTask = completeTask;
+
+</script>
+
+{% endblock %}

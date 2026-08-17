@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Note | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container small-container">
+
+    <div class="page-title">
+
+        <div>
+            <span class="eyebrow">EDIT NOTE</span>
+            <h1>Update Your Note ✏️</h1>
+        </div>
+
+        <a
+            href="{{ url_for('views.notes') }}"
+            class="btn secondary-btn"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+
+    <section class="form-card">
+
+        <form method="POST">
+
+            <label>Title</label>
+
+            <input
+                type="text"
+                name="title"
+                value="{{ note.title }}"
+                required
+            >
+
+
+            <label>Category</label>
+
+            <select name="category">
+
+                <option value="General"
+                    {% if note.category == "General" %}selected{% endif %}>
+                    General
+                </option>
+
+                <option value="University"
+                    {% if note.category == "University" %}selected{% endif %}>
+                    University
+                </option>
+
+                <option value="Study"
+                    {% if note.category == "Study" %}selected{% endif %}>
+                    Study
+                </option>
+
+                <option value="Projects"
+                    {% if note.category == "Projects" %}selected{% endif %}>
+                    Projects
+                </option>
+
+                <option value="Personal"
+                    {% if note.category == "Personal" %}selected{% endif %}>
+                    Personal
+                </option>
+
+            </select>
+
+
+            <label>Content</label>
+
+            <textarea
+                name="note"
+                rows="16"
+                required
+            >{{ note.data }}</textarea>
+
+
+            <button
+                type="submit"
+                class="btn primary-btn"
+            >
+                Save Changes
+            </button>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

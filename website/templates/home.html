@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- =====================================================
+         WELCOME
+    ====================================================== -->
+
+    <section class="dashboard-welcome">
+
+        <span class="dashboard-eyebrow">
+            STUDENT PRODUCTIVITY
+        </span>
+
+        <h1>
+            Hey, {{ current_user.first_name }} 👋
+        </h1>
+
+        <p>
+            Plan smarter. Study better. Get things done.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <section class="dashboard-summary">
+
+
+        <!-- NOTES -->
+
+        <a
+            href="{{ url_for('views.notes') }}"
+            class="summary-card notes-summary"
+        >
+
+            <div class="summary-icon">
+                📝
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    NOTES
+                </span>
+
+                <strong>
+                    {{ notes|length }}
+                </strong>
+
+                <p>
+                    saved
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- TASKS -->
+
+        <a
+            href="{{ url_for('tasks.task_page') }}"
+            class="summary-card tasks-summary"
+        >
+
+            <div class="summary-icon">
+                ✅
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    TASKS
+                </span>
+
+                <strong>
+                    {{ tasks|selectattr('completed', 'equalto', false)|list|length }}
+                </strong>
+
+                <p>
+                    remaining
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <!-- PLANNER -->
+
+        <a
+            href="{{ url_for('planner.study_planner') }}"
+            class="summary-card planner-summary"
+        >
+
+            <div class="summary-icon">
+                📚
+            </div>
+
+            <div class="summary-content">
+
+                <span class="summary-label">
+                    STUDY PLANNER
+                </span>
+
+                <strong>
+                    {{ sessions|length }}
+                </strong>
+
+                <p>
+                    sessions planned
+                </p>
+
+            </div>
+
+            <span class="summary-arrow">
+                →
+            </span>
+
+        </a>
+
+
+    </section>
+
+
+    <!-- =====================================================
+         MOTIVATIONAL FOOTER
+    ====================================================== -->
+
+    <section class="dashboard-motivation">
+
+        <div class="motivation-line"></div>
+
+        <p>
+            Small steps still move you forward. 🌱
+        </p>
+
+        <div class="motivation-line"></div>
+
+    </section>
+
+</div>
+
+{% endblock %}

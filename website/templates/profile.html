@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-title">
+
+        <div>
+
+            <span class="eyebrow">
+                YOUR ACCOUNT
+            </span>
+
+            <h1>
+                Profile 👤
+            </h1>
+
+            <p>
+                Manage your StudyFlow account.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-card">
+
+        <div class="profile-avatar">
+            {{ user.first_name[0]|upper }}
+        </div>
+
+
+        <div class="profile-info">
+
+            <h2>
+                {{ user.first_name }}
+            </h2>
+
+            <p>
+                {{ user.email }}
+            </p>
+
+            <span class="profile-badge">
+                Student
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="profile-actions">
+
+        <a
+            href="{{ url_for('views.notes') }}"
+            class="dashboard-action"
+        >
+            📝
+
+            <strong>
+                My Notes
+            </strong>
+
+            <span>
+                Manage your study material
+            </span>
+
+        </a>
+
+
+        <a
+            href="{{ url_for('tasks.task_page') }}"
+            class="dashboard-action"
+        >
+            ✅
+
+            <strong>
+                My Tasks
+            </strong>
+
+            <span>
+                Track assignments and deadlines
+            </span>
+
+        </a>
+
+
+        <a
+            href="{{ url_for('planner.study_planner') }}"
+            class="dashboard-action"
+        >
+            📅
+
+            <strong>
+                Study Planner
+            </strong>
+
+            <span>
+                Plan focused study sessions
+            </span>
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

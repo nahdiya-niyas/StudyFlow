@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}Notes | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <!-- PAGE HEADER -->
+
+    <div class="page-title">
+
+        <div>
+
+            <span class="eyebrow">
+                KNOWLEDGE BASE
+            </span>
+
+            <h1>
+                My Notes 📝
+            </h1>
+
+            <p>
+                Capture ideas, lessons and everything worth remembering.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="notes-layout">
+
+
+        <!-- =====================================================
+             CREATE NOTE
+             ===================================================== -->
+
+        <section class="form-card">
+
+            <h2>
+                Create a note
+            </h2>
+
+            <form
+                method="POST"
+                action="{{ url_for('views.notes') }}"
+            >
+
+                <label for="title">
+                    Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="Computer Networks"
+                    required
+                >
+
+
+                <label for="category">
+                    Category
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                >
+
+                    <option value="General">
+                        General
+                    </option>
+
+                    <option value="University">
+                        University
+                    </option>
+
+                    <option value="Study">
+                        Study
+                    </option>
+
+                    <option value="Projects">
+                        Projects
+                    </option>
+
+                    <option value="Personal">
+                        Personal
+                    </option>
+
+                </select>
+
+
+                <label for="note">
+                    Content
+                </label>
+
+                <textarea
+                    id="note"
+                    name="note"
+                    rows="9"
+                    placeholder="Write something..."
+                    required
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                >
+                    + Create Note
+                </button>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             SAVED NOTES
+             ===================================================== -->
+
+        <section>
+
+            <div class="notes-header">
+
+                <h2>
+                    All Notes
+                </h2>
+
+                <span id="notes-count">
+
+                    {{ notes|length }}
+
+                    {% if notes|length == 1 %}
+                        note
+                    {% else %}
+                        notes
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            {% if notes %}
+
+            <div
+                class="notes-grid"
+                id="notes-list"
+            >
+
+                {% for note in notes %}
+
+                <!-- =================================================
+                     NOTE CARD
+                     ================================================= -->
+
+                <article
+                    class="note-card"
+                    id="note-{{ note.id }}"
+                >
+
+                    <!-- TOP -->
+
+                    <div class="note-card-top">
+
+                        <span class="category">
+                            {{ note.category }}
+                        </span>
+
+
+                        <div>
+
+                            <!-- PIN -->
+
+                            <button
+                                type="button"
+                                class="icon-btn"
+                                onclick="event.stopPropagation(); togglePin({{ note.id }})"
+                                title="Pin note"
+                            >
+
+                                {% if note.is_pinned %}
+                                    📌
+                                {% else %}
+                                    📍
+                                {% endif %}
+
+                            </button>
+
+
+                            <!-- FAVORITE -->
+
+                            <button
+                                type="button"
+                                class="icon-btn"
+                                onclick="event.stopPropagation(); toggleFavorite({{ note.id }})"
+                                title="Favorite note"
+                            >
+
+                                {% if note.is_favorite %}
+                                    ⭐
+                                {% else %}
+                                    ☆
+                                {% endif %}
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CLICKABLE NOTE AREA -->
+
+                    <a
+                        href="{{ url_for('views.read_note', note_id=note.id) }}"
+                        class="note-read-link"
+                    >
+
+                        <h3>
+                            {{ note.title }}
+                        </h3>
+
+
+                        <p class="note-content">
+                            {{ note.data }}
+                        </p>
+
+
+                        <span class="read-note-label">
+                            Read full note →
+                        </span>
+
+                    </a>
+
+
+
+                    <!-- FOOTER -->
+
+                    <div class="note-footer">
+
+                        <small>
+                            {{ note.date.strftime('%d %b %Y') }}
+                        </small>
+
+
+                        <div class="note-actions">
+
+                            <!-- EDIT -->
+
+                            <a
+                                href="{{ url_for('views.edit_note', note_id=note.id) }}"
+                                class="edit-btn"
+                            >
+                                ✏️ Edit
+                            </a>
+
+
+                            <!-- DELETE -->
+
+                            <button
+                                type="button"
+                                class="delete-btn note-delete-btn"
+                                onclick="deleteNote({{ note.id }})"
+                                title="Delete note"
+                            >
+                                🗑️ Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+
+            {% else %}
+
+            <!-- EMPTY STATE -->
+
+            <div class="empty-state">
+
+                <div>
+                    📝
+                </div>
+
+                <h3>
+                    No notes yet
+                </h3>
+
+                <p>
+                    Create your first note.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SMALL NOTE-LINK STYLING
+     ========================================================= -->
+
+<style>
+
+.note-read-link {
+
+    display: block;
+
+    color: inherit;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+}
+
+
+.note-read-link h3 {
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+
+.note-read-link:hover h3 {
+
+    color: var(--pink, #d85c91);
+
+    transform: translateX(2px);
+
+}
+
+
+.note-read-link .note-content {
+
+    transition:
+        color 0.2s ease;
+
+}
+
+
+.note-read-link:hover .note-content {
+
+    color: #51434c;
+
+}
+
+
+.read-note-label {
+
+    display: inline-block;
+
+    margin-top: 10px;
+
+    color: var(--pink, #d85c91);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+
+}
+
+
+</style>
+
+{% endblock %}

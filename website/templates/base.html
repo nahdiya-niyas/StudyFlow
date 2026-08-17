@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="StudyFlow — a simple student productivity and study planning platform."
+    >
+
+    <meta
+        name="theme-color"
+        content="#7661c9"
+    >
+
+    <title>
+        {% block title %}StudyFlow{% endblock %}
+    </title>
+
+    <link
+    rel="icon"
+    type="image/png"
+    href="{{ url_for('static', filename='logo.png') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+{% if current_user.is_authenticated %}
+
+<nav
+    class="navbar"
+    aria-label="Main navigation"
+>
+
+    <!-- BRAND -->
+
+    <a
+        href="{{ url_for('views.home') }}"
+        class="brand"
+        aria-label="StudyFlow Dashboard"
+    >
+        <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        alt="StudyFlow logo"
+        class="brand-logo"
+    >
+        <span>StudyFlow</span>
+    </a>
+
+
+    <!-- NAVIGATION -->
+
+    <div class="nav-links">
+
+        <a
+            href="{{ url_for('views.home') }}"
+        >
+            📊 Dashboard
+        </a>
+
+
+        <a
+            href="{{ url_for('views.notes') }}"
+        >
+            📝 Notes
+        </a>
+
+
+        <a
+            href="{{ url_for('tasks.task_page') }}"
+        >
+            ✅ Tasks
+        </a>
+
+
+        <a
+            href="{{ url_for('planner.study_planner') }}"
+        >
+            📅 Planner
+        </a>
+
+
+        <a
+            href="{{ url_for('views.profile') }}"
+        >
+            👤 Profile
+        </a>
+
+    </div>
+
+
+    <!-- LOGOUT -->
+
+    <a
+        href="{{ url_for('auth.logout') }}"
+        class="logout-link"
+    >
+        Logout
+    </a>
+
+</nav>
+
+{% endif %}
+
+
+
+<!-- =====================================================
+     FLASH MESSAGES
+====================================================== -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div
+            class="flash-container"
+            aria-live="polite"
+        >
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+
+                    <span>
+                        {{ message }}
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endwith %}
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main>
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+
+
+<!-- =====================================================
+     GLOBAL JAVASCRIPT
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='index.js') }}"
+    defer
+></script>
+
+
+</body>
+
+</html>

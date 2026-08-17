@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} | StudyFlow{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="read-note-page">
+
+        <!-- BACK -->
+
+        <a
+            href="{{ url_for('views.notes') }}"
+            class="back-to-notes"
+        >
+            ← Back to Notes
+        </a>
+
+
+        <!-- NOTE READER -->
+
+        <article class="full-note-card">
+
+            <!-- CATEGORY -->
+
+            <span class="category">
+                {{ note.category }}
+            </span>
+
+
+            <!-- TITLE -->
+
+            <h1>
+                {{ note.title }}
+            </h1>
+
+
+            <!-- DATE -->
+
+            <div class="full-note-date">
+                Created {{ note.date.strftime('%d %B %Y') }}
+            </div>
+
+
+            <div class="full-note-divider"></div>
+
+
+            <!-- CONTENT -->
+
+            <div class="full-note-content">
+                {{ note.data }}
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="full-note-actions">
+
+                <a
+                    href="{{ url_for('views.edit_note', note_id=note.id) }}"
+                    class="edit-btn"
+                >
+                    ✏️ Edit Note
+                </a>
+
+                <a
+                    href="{{ url_for('views.notes') }}"
+                    class="secondary-btn"
+                >
+                    ← All Notes
+                </a>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</div>
+
+
+<style>
+
+.read-note-page {
+
+    width: min(850px, 100%);
+
+    margin: 0 auto;
+
+    padding-bottom: 50px;
+
+}
+
+
+/* BACK BUTTON */
+
+.back-to-notes {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 20px;
+
+    color: #9a5675;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+
+}
+
+
+.back-to-notes:hover {
+
+    color: #d85c91;
+
+    transform: translateX(-3px);
+
+}
+
+
+/* MAIN CARD */
+
+.full-note-card {
+
+    padding: clamp(25px, 5vw, 48px);
+
+    background: #ffffff;
+
+    border: 1px solid #f1d9e4;
+
+    border-radius: 26px;
+
+    box-shadow:
+        0 20px 60px rgba(184, 94, 135, 0.10);
+
+}
+
+
+/* CATEGORY */
+
+.full-note-card .category {
+
+    display: inline-flex;
+
+    padding: 7px 13px;
+
+    margin-bottom: 17px;
+
+    border-radius: 999px;
+
+    background: #fde7f0;
+
+    color: #ad4d77;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+}
+
+
+/* TITLE */
+
+.full-note-card h1 {
+
+    margin: 0;
+
+    color: #2d252b;
+
+    font-family:
+        "Plus Jakarta Sans",
+        sans-serif;
+
+    font-size: clamp(28px, 5vw, 42px);
+
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    letter-spacing: -1px;
+
+}
+
+
+/* DATE */
+
+.full-note-date {
+
+    margin-top: 10px;
+
+    color: #8c7580;
+
+    font-family:
+        "DM Sans",
+        sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+/* DIVIDER */
+
+.full-note-divider {
+
+    width: 100%;
+
+    height: 1px;
+
+    margin: 28px 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            #efcddd,
+            #f8e9f0,
+            transparent
+        );
+
+}
+
+
+/* FULL NOTE TEXT */
+
+.full-note-content {
+
+    color: #40363d;
+
+    font-family:
+        "DM Sans",
+        sans-serif;
+
+    font-size: 16px;
+
+    font-weight: 500;
+
+    line-height: 1.9;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ACTIONS */
+
+.full-note-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 35px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #f2e1e8;
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .full-note-card {
+
+        padding: 25px 20px;
+
+        border-radius: 20px;
+
+    }
+
+
+    .full-note-card h1 {
+
+        font-size: 28px;
+
+    }
+
+
+    .full-note-content {
+
+        font-size: 15px;
+
+        line-height: 1.8;
+
+    }
+
+
+    .full-note-actions {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .full-note-actions a {
+
+        width: 100%;
+
+        justify-content: center;
+
+        text-align: center;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
