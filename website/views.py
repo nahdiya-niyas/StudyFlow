@@ -162,7 +162,7 @@ def read_note(note_id):
         )
 
     return render_template(
-        "read_note.html",
+        "view_note.html",
         user=current_user,
         note=note
     )
