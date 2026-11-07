@@ -1,0 +1,70 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: studyflow
+  namespace: studyflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: studyflow
+  template:
+    metadata:
+      labels:
+        app: studyflow
+    spec:
+      containers:
+        - name: studyflow
+          image: studyflow:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: studyflow-secret
+                  key: SECRET_KEY
+          envFrom:
+            - configMapRef:
+                name: studyflow-config
+          readinessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: studyflow-storage
+              mountPath: /app/instance
+      volumes:
+        - name: studyflow-storage
+          persistentVolumeClaim:
+            claimName: studyflow-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: studyflow
+  namespace: studyflow
+spec:
+  type: NodePort
+  selector:
+    app: studyflow
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30080
